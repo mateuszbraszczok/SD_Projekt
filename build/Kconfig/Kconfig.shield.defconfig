@@ -1,0 +1,3 @@
+osource "c:/nordic/myapps/dht/boards/shields/*/Kconfig.defconfig"
+osource "c:/nordic/myapps/heart_sensor/boards/shields/*/Kconfig.defconfig"
+osource "C:/Users/Mateusz/ncs/v1.9.1/nrf/boards/shields/*/Kconfig.defconfig"
