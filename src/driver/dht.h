@@ -9,7 +9,7 @@
     {
         DHT_SUCCESS,
         DHT_FAIL,
-    } DHT22ErrorCode;
+    } DHTErrorCode;
 
     typedef enum DHTModel 
     {
@@ -26,6 +26,6 @@
         DHTModel dhtModel;
     };
 
-    void dhtRead(struct DHTReadings* dht);
+    DHTErrorCode dhtRead(struct DHTReadings* dht);
 
 #endif

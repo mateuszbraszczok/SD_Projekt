@@ -18,7 +18,7 @@ void sendSignalToDHTSensor()
   nrf_delay_ms(18);
 }
 
-void waitForDHTResponse()
+DHTErrorCode waitForDHTResponse()
 {
   /* MCU waits for DHT response */
   nrf_gpio_cfg_input(DHT_PIN, NRF_GPIO_PIN_NOPULL);
@@ -27,6 +27,7 @@ void waitForDHTResponse()
   if(nrf_gpio_pin_read(DHT_PIN)!=0) 
   {
       printk("no ACK\n");
+      return DHT_FAIL;
   }
 
   int cntr = 18;
@@ -38,6 +39,7 @@ void waitForDHTResponse()
     if (--cntr==0) 
     {
       printk("no ACK2\n"); 
+      return DHT_FAIL;
     }
   }
   cntr = 18;
@@ -49,11 +51,13 @@ void waitForDHTResponse()
     if (--cntr==0) 
     {
       printk("no ACK3\n"); /* signal should be up for the ACK here */
+      return DHT_FAIL;
     }
   }
+  return DHT_SUCCESS;
 }
 
-void readingDataFromDHTSensor(uint8_t *buffer)
+DHTErrorCode readingDataFromDHTSensor(uint8_t *buffer)
 {
   int i = 0;
   int data = 0;
@@ -67,6 +71,7 @@ void readingDataFromDHTSensor(uint8_t *buffer)
       if (--cntr==0) 
       {
         printk("DHT11_NO_DATA_0\n");
+        return DHT_FAIL;
       }
     }
     cntr = 15; /* wait max 75 us */
@@ -76,6 +81,7 @@ void readingDataFromDHTSensor(uint8_t *buffer)
       if (--cntr==0) 
       {
         printk("DHT11_NO_DATA_1\n");
+        return DHT_FAIL;
       }
     }
     data <<= 1; /* next data bit */
@@ -90,21 +96,25 @@ void readingDataFromDHTSensor(uint8_t *buffer)
       data = 0;
     }
   } while(--loopBits!=0);
+
+  return DHT_SUCCESS;
 }
   
-void verifyReturnedBuffer(uint8_t *buffer)
+DHTErrorCode verifyReturnedBuffer(uint8_t *buffer)
 {
   if ((uint8_t)(buffer[0]+buffer[1]+buffer[2]+buffer[3])!=buffer[4]) 
   {
       printk("DHT11_BAD_CRC\n");
+      return DHT_FAIL;
   }
+  return DHT_SUCCESS;
 }
   
 //--------------------------------------------------------
 
 // INTERFACE
 
-void dhtRead(struct DHTReadings* dht)
+DHTErrorCode dhtRead(struct DHTReadings* dht)
 {
   // BUFFER TO RECEIVE
   uint8_t buffer[5];
@@ -117,9 +127,22 @@ void dhtRead(struct DHTReadings* dht)
   }
 
   sendSignalToDHTSensor();
-  waitForDHTResponse();
-  readingDataFromDHTSensor(buffer);
-  verifyReturnedBuffer(buffer);
+
+  if (waitForDHTResponse() == DHT_FAIL)
+  {
+    printk("Big Fail");
+    return DHT_FAIL;
+  }
+  if (readingDataFromDHTSensor(buffer) == DHT_FAIL)
+  {
+    printk("Very Big Fail");
+    return DHT_FAIL;
+  }
+  if (verifyReturnedBuffer(buffer) == DHT_FAIL)
+  {
+    printk("Very very  Big Fail");
+    return DHT_FAIL;
+  }
   
   if (dht->dhtModel == DHT22)
   {
@@ -140,5 +163,5 @@ void dhtRead(struct DHTReadings* dht)
     dht->temperatureDecimalPart = buffer[3];
   }
 
-  return;
+  return DHT_SUCCESS;
 }

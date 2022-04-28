@@ -37,3 +37,8 @@ if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "C:/Users/Mateusz/ncs/v1.9.1/toolchain/opt/bin/arm-none-eabi-objdump.exe")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/nordic/myapps/myfirstapp/build/modules/tinycrypt/lib/cmake_install.cmake")
+endif()
+
