@@ -56,32 +56,56 @@ void main(void)
 
 	int i = 0;
 	nrf_gpio_cfg_output(RELAY_PIN);
+	nrf_gpio_pin_clear(RELAY_PIN);
+
 	while (1) 
 	{
 
-		if(i%2==0)
-		{
-			nrf_gpio_pin_set(RELAY_PIN);
-			printk("ON\n");
-		}
-		else 
-		{
-			nrf_gpio_pin_clear(RELAY_PIN);
-			printk("OFF\n");
-		}
+		// if(i%2==0)
+		// {
+		// 	nrf_gpio_pin_set(RELAY_PIN);
+		// 	printk("ON\n");
+		// }
+		// else 
+		// {
+		// 	nrf_gpio_pin_clear(RELAY_PIN);
+		// 	printk("OFF\n");
+		// }
 		
 		
 		//nrf_gpio_pin_clear(RELAY_PIN);
 		printk("hello: %d\n", ++i);
 
 		//sd_ble_gap_address_get()
+		
 
-		// struct dht22Readings dht22;
-		// dht22.dhtModel = DHT22;
-		// dhtRead(&dht22);
-		// printk("temperature: %d.%d C\n", dht22.temperatureIntPart, dht22.temperatureDecimalPart);
-		// printk("humidity: %d.%d %%\n", dht22.humidityIntPart, dht22.humidityDecimalPart);
-		// printk("\n\n");
+		//TEMPERATURE READING
+		struct DHTReadings dht22;
+		dht22.dhtModel = DHT22;
+		dhtRead(&dht22);
+		printk("temperature: %d.%d C\n", dht22.temperatureIntPart, dht22.temperatureDecimalPart);
+		printk("humidity: %d.%d %%\n", dht22.humidityIntPart, dht22.humidityDecimalPart);
+		printk("\n\n");
+
+
+		//RELAY CONTROLLING
+
+		int SetPoint;
+		int Hysteresis;
+
+		SetPoint = 24;
+		Hysteresis = 1;
+
+		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) < SetPoint - Hysteresis)
+		{
+			nrf_gpio_pin_set(RELAY_PIN);
+			printk("ON\n");
+		}
+		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) > SetPoint + Hysteresis)
+		{
+			nrf_gpio_pin_clear(RELAY_PIN);
+			printk("OFF\n");
+		}
 
 		//BLINKING LED
 		gpio_pin_set(dev, PIN, (int)led_is_on);

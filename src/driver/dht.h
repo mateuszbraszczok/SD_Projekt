@@ -1,7 +1,7 @@
 #ifndef __DHT_H__
 #define __DHT_H__
 
-#define DHT_PIN   NRF_GPIO_PIN_MAP(1,10)
+#define DHT_PIN   NRF_GPIO_PIN_MAP(1,11)
 
 #include <stdint.h>
 
