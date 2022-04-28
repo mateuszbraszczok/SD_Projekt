@@ -7,6 +7,10 @@ static K_SEM_DEFINE(bt_init_ok, 1, 1);
 
 #define DEVICE_NAME CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN (sizeof(DEVICE_NAME)-1)
+
+
+static uint8_t button_value = 0;
+
  
 static const struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
@@ -17,7 +21,29 @@ static const struct bt_data sd[] = {
     BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_REMOTE_SERV_VAL),
 };
 
+/* Declarations */
+static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
+
+
+BT_GATT_SERVICE_DEFINE(remote_srv,
+BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
+    BT_GATT_CHARACTERISTIC(BT_UUID_REMOTE_TEMPERATURE,
+                    BT_GATT_CHRC_READ,
+                    BT_GATT_PERM_READ,
+                    read_button_characteristic_cb, NULL, NULL),
+);
+
+
 /* Callbacks */
+
+
+static ssize_t read_button_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 void *buf, uint16_t len, uint16_t offset)
+{
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, &button_value,
+				 sizeof(button_value));
+}
+
 void bt_ready(int err)
 {
     if (err) 
@@ -27,6 +53,11 @@ void bt_ready(int err)
     k_sem_give(&bt_init_ok);
 }
 
+
+void set_button_value(uint8_t btn_value)
+{
+    button_value = btn_value;
+}
 
 int bluetooth_init(struct bt_conn_cb *bt_cb)
 {

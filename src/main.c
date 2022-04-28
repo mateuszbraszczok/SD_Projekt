@@ -120,6 +120,7 @@ void main(void)
 		{
 			printk("temperature: %d.%d C\n", dht22.temperatureIntPart, dht22.temperatureDecimalPart);
 			printk("humidity: %d.%d %%\n", dht22.humidityIntPart, dht22.humidityDecimalPart);
+			set_button_value(dht22.temperatureIntPart);
 		}
 		
 		
