@@ -36,6 +36,18 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #define FLAGS	0
 #endif
 
+
+
+
+
+
+#define STACKSIZE 1024
+
+#define THREAD0_PRIORITY 1
+
+
+K_MUTEX_DEFINE(test_mutex);
+
 #define RELAY_PIN   NRF_GPIO_PIN_MAP(1,10)
 
 
@@ -44,11 +56,32 @@ static struct bt_conn *current_conn;
 /* Declarations */
 void on_connected(struct bt_conn *conn, uint8_t err);
 void on_disconnected(struct bt_conn *conn, uint8_t reason);
+void on_notif_changed(enum bt_button_notifications_enabled status);
+void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t len);
 
 struct bt_conn_cb bluetooth_callbacks = {
 	.connected 		= on_connected,
 	.disconnected 	= on_disconnected,
 };
+
+
+
+struct bt_remote_service_cb remote_callbacks = {
+	.notif_changed = on_notif_changed,
+	.data_received = on_data_received,
+};
+
+/* Callbacks */
+
+void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t len)
+{
+	uint8_t temp_str[len+1];
+	memcpy(temp_str, data, len);
+	temp_str[len] = 0x00;
+
+	LOG_INF("Received data on conn %p. Len: %d", (void *)conn, len);
+	LOG_INF("Data: %s", log_strdup(temp_str));
+}
 
 void on_connected(struct bt_conn *conn, uint8_t err)
 {
@@ -71,7 +104,55 @@ void on_disconnected(struct bt_conn *conn, uint8_t reason)
 	}
 }
 
-/* Callbacks */
+void on_notif_changed(enum bt_button_notifications_enabled status)
+{
+	if (status == BT_BUTTON_NOTIFICATIONS_ENABLED) {
+		LOG_INF("Notifications enabled");
+	}
+	else {
+		LOG_INF("Notificatons disabled");
+	}
+}
+
+struct DHTReadings dht22;
+
+
+void thread0(void)
+{
+	dht22.dhtModel = DHT22;
+	
+
+	while (1) 
+	{
+		k_mutex_lock(&test_mutex, K_FOREVER);
+
+		//TEMPERATURE READING
+		if (dhtRead(&dht22) == DHT_FAIL)
+		{
+			printk("Can't read temperature!\n");
+		}
+		else
+		{
+			printk("temperature: %d.%d C\n", dht22.temperatureIntPart, dht22.temperatureDecimalPart);
+			printk("humidity: %d.%d %%\n", dht22.humidityIntPart, dht22.humidityDecimalPart);
+
+			
+			setTemperature(getTemperature(&dht22));
+			int err;
+
+			err = send_button_notification(current_conn, getTemperature(&dht22));
+			if (err) {
+				LOG_ERR("couldn't send notification (err: %d)", err);
+			}
+
+			setHumidity(getHumidity(&dht22));
+		}
+
+		k_mutex_unlock(&test_mutex);
+		k_msleep(SLEEP_TIME_MS);
+	}
+}
+
 
 void main(void)
 {
@@ -96,10 +177,8 @@ void main(void)
 	nrf_gpio_cfg_output(RELAY_PIN);
 	nrf_gpio_pin_clear(RELAY_PIN);
 
-	struct DHTReadings dht22;
-	dht22.dhtModel = DHT22;
-
-	err = bluetooth_init(&bluetooth_callbacks);
+	
+	err = bluetooth_init(&bluetooth_callbacks, &remote_callbacks);
 
 	if (err)
 	{
@@ -111,19 +190,7 @@ void main(void)
 	{
 		printk("iteration: %d\n", ++i);
 
-		//TEMPERATURE READING
-		if (dhtRead(&dht22) == DHT_FAIL)
-		{
-			printk("Can't read temperature!\n");
-		}
-		else
-		{
-			printk("temperature: %d.%d C\n", dht22.temperatureIntPart, dht22.temperatureDecimalPart);
-			printk("humidity: %d.%d %%\n", dht22.humidityIntPart, dht22.humidityDecimalPart);
-			set_button_value(dht22.temperatureIntPart);
-		}
-		
-		
+
 		//RELAY CONTROLLING
 		int SetPoint;
 		int Hysteresis;
@@ -150,3 +217,9 @@ void main(void)
 		k_msleep(SLEEP_TIME_MS);
 	}
 }
+
+
+
+
+K_THREAD_DEFINE(thread0_id, STACKSIZE, thread0, NULL, NULL, NULL,
+		THREAD0_PRIORITY, 0, 0);

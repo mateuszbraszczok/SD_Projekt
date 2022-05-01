@@ -27,7 +27,7 @@ BOARD:STRING=nrf52840dk_nrf52840
 BOARD_DIR:PATH=C:/Users/Mateusz/ncs/v1.9.1/zephyr/boards/arm/nrf52840dk_nrf52840
 
 //No help, variable specified on the command line.
-BOARD_ROOT:STRING=c:/nordic/myapps/dht;c:/nordic/myapps/heart_sensor
+BOARD_ROOT:STRING=c:/nordic/myapps/dht;c:/nordic/myapps/heart_sensor;c:/nordic/myapps/peripheral_lbs;c:/nordic/myapps/peripheral_uart;c:/nordic/myapps/perpheral_hr
 
 //Path to a program.
 BOSSAC:FILEPATH=BOSSAC-NOTFOUND
@@ -42,7 +42,7 @@ CACHED_BOARD:STRING=nrf52840dk_nrf52840
 // listed, e.g. CONF_FILE="prj1.confi;prj2.conf" The CACHED_CONF_FILE
 // is internal Zephyr variable used between CMake runs. To change
 // CONF_FILE, use the CONF_FILE variable.
-CACHED_CONF_FILE:STRING=C:/nordic/myapps/myfirstapp/prj.conf
+CACHED_CONF_FILE:STRING=c:/nordic/myapps/myfirstapp/prj.conf
 
 //Selected shield
 CACHED_SHIELD:STRING=

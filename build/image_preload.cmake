@@ -1,6 +1,6 @@
 # Generated file that can be used to preload variant images
-set(BOARD_ROOT c:/nordic/myapps/dht;c:/nordic/myapps/heart_sensor;C:/Users/Mateusz/ncs/v1.9.1/nrf;C:/Users/Mateusz/ncs/v1.9.1/zephyr CACHE INTERNAL "NCS child image controlled")
-set(CACHED_CONF_FILE C:/nordic/myapps/myfirstapp/prj.conf CACHE INTERNAL "NCS child image controlled")
+set(BOARD_ROOT c:/nordic/myapps/dht;c:/nordic/myapps/heart_sensor;c:/nordic/myapps/peripheral_lbs;c:/nordic/myapps/peripheral_uart;c:/nordic/myapps/perpheral_hr;C:/Users/Mateusz/ncs/v1.9.1/nrf;C:/Users/Mateusz/ncs/v1.9.1/zephyr CACHE INTERNAL "NCS child image controlled")
+set(CACHED_CONF_FILE c:/nordic/myapps/myfirstapp/prj.conf CACHE INTERNAL "NCS child image controlled")
 set(CONFIG_DEBUG_OPTIMIZATIONS y CACHE INTERNAL "NCS child image controlled")
 set(CONFIG_DEBUG_THREAD_INFO y CACHE INTERNAL "NCS child image controlled")
 set(DTC_OVERLAY_FILE  CACHE INTERNAL "NCS child image controlled")

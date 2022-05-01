@@ -130,17 +130,14 @@ DHTErrorCode dhtRead(struct DHTReadings* dht)
 
   if (waitForDHTResponse() == DHT_FAIL)
   {
-    printk("Big Fail");
     return DHT_FAIL;
   }
   if (readingDataFromDHTSensor(buffer) == DHT_FAIL)
   {
-    printk("Very Big Fail");
     return DHT_FAIL;
   }
   if (verifyReturnedBuffer(buffer) == DHT_FAIL)
   {
-    printk("Very very  Big Fail");
     return DHT_FAIL;
   }
   
@@ -165,3 +162,16 @@ DHTErrorCode dhtRead(struct DHTReadings* dht)
 
   return DHT_SUCCESS;
 }
+
+float getTemperature(struct DHTReadings* dht)
+{
+  float temperature = (float) (dht->temperatureIntPart + (dht->temperatureDecimalPart / 10.0));
+  return temperature;
+}
+
+float getHumidity(struct DHTReadings* dht)
+{
+  float humidity = (float) (dht->humidityIntPart + (dht->humidityDecimalPart / 10.0));
+  return humidity;
+}
+  

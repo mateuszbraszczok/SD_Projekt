@@ -27,5 +27,7 @@
     };
 
     DHTErrorCode dhtRead(struct DHTReadings* dht);
+    float getTemperature(struct DHTReadings* dht);
+    float getHumidity(struct DHTReadings* dht);
 
 #endif

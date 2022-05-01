@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Mateusz/ncs/v1.9.1/zephyr/lib/libc/minimal
+# Install script for directory: C:/Users/Mateusz/ncs/v1.9.1/zephyr/lib/libc/newlib
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

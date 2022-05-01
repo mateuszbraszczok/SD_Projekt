@@ -14,7 +14,7 @@ linker_zephyr_pre1.cmd: \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/sys/util_macro.h \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/sys/util_internal.h \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/sys/util_loops.h \
- C:/Users/Mateusz/ncs/v1.9.1/zephyr/lib/libc/minimal/include/stdbool.h \
+ c:\users\mateusz\ncs\v1.9.1\toolchain\opt\lib\gcc\arm-none-eabi\9.2.1\include\stdbool.h \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/devicetree/io-channels.h \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/devicetree/clocks.h \
  C:/Users/Mateusz/ncs/v1.9.1/zephyr/include/devicetree/gpio.h \
