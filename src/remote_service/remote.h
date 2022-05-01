@@ -30,13 +30,15 @@
 #define BT_UUID_REMOTE_HUMIDITY 	 BT_UUID_DECLARE_128(BT_UUID_REMOTE_HUMIDITY_VAL)
 #define BT_UUID_REMOTE_MESSAGE_CHRC  BT_UUID_DECLARE_128(BT_UUID_REMOTE_MESSAGE_CHRC_VAL)
 
-enum bt_button_notifications_enabled {
+enum bt_button_notifications_enabled 
+{
 	BT_BUTTON_NOTIFICATIONS_ENABLED,
 	BT_BUTTON_NOTIFICATIONS_DISABLED,
 };
 
 
-struct bt_remote_service_cb {
+struct bt_remote_service_cb 
+{
 	void (*notif_changed)(enum bt_button_notifications_enabled status);
 	void (*data_received)(struct bt_conn *conn, const uint8_t *const data, uint16_t len);
 };

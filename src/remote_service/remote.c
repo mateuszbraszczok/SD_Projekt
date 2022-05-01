@@ -7,21 +7,21 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 static K_SEM_DEFINE(bt_init_ok, 1, 1);
 
-
-static float temperatureValue = 0.0;
 static float humidityValue = 0.0;
-static char zmienna[5] = "dupa";
+static char temperatureValue[5] = "temp";
 
 
 enum bt_button_notifications_enabled notifications_enabled;
 static struct bt_remote_service_cb remote_callbacks;
 
-static const struct bt_data ad[] = {
+static const struct bt_data ad[] = 
+{
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
     BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN)
 };
 
-static const struct bt_data sd[] = {
+static const struct bt_data sd[] = 
+{
     BT_DATA_BYTES(BT_DATA_UUID128_ALL, BT_UUID_REMOTE_SERV_VAL),
 };
 
@@ -51,39 +51,25 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
 
 /* Callbacks */
 
-
-
-
-
-
-
-
 static ssize_t read_temperature_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 void *buf, uint16_t len, uint16_t offset)
+			                                    void *buf, uint16_t len, uint16_t offset)
 {
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, zmienna,
-				 sizeof(zmienna));
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, temperatureValue, sizeof(temperatureValue));
 }
 
 static ssize_t read_humidity_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 void *buf, uint16_t len, uint16_t offset)
+			                                void *buf, uint16_t len, uint16_t offset)
 {
-	return bt_gatt_attr_read(conn, attr, buf, len, offset, &humidityValue,
-				 sizeof(humidityValue));
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, &humidityValue, sizeof(humidityValue));
 }
 
-
-static ssize_t on_write(struct bt_conn *conn,
-			  const struct bt_gatt_attr *attr,
-			  const void *buf,
-			  uint16_t len,
-			  uint16_t offset,
-			  uint8_t flags)
+static ssize_t on_write(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
 	LOG_INF("Received data, handle %d, conn %p",
 		attr->handle, (void *)conn);
 
-	if (remote_callbacks.data_received) {
+	if (remote_callbacks.data_received) 
+    {
 		remote_callbacks.data_received(conn, buf, len);
     }
 	return len;
@@ -101,7 +87,8 @@ void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value
     LOG_INF("Notifications %s", notif_enabled? "enabled":"disabled");
 
     notifications_enabled = notif_enabled? BT_BUTTON_NOTIFICATIONS_ENABLED:BT_BUTTON_NOTIFICATIONS_DISABLED;
-    if (remote_callbacks.notif_changed) {
+    if (remote_callbacks.notif_changed) 
+    {
         remote_callbacks.notif_changed(notifications_enabled);
     }
 }
@@ -109,7 +96,8 @@ void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value
 
 void bt_ready(int err)
 {
-    if (err) {
+    if (err)
+    {
         LOG_ERR("bt_ready returned %d", err);
     }
     k_sem_give(&bt_init_ok);
@@ -117,9 +105,7 @@ void bt_ready(int err)
 
 
 
-//int send_button_notification(struct bt_conn *conn, uint8_t value, uint16_t length)
-
-int send_button_notification(struct bt_conn *conn, float value)
+int send_button_notification(struct bt_conn *conn, float temperature)
 {
     int err = 0;
 
@@ -127,12 +113,12 @@ int send_button_notification(struct bt_conn *conn, float value)
     const struct bt_gatt_attr *attr = &remote_srv.attrs[2];
 
     char buf[5];
-    sprintf(buf, "%0.1f", value);
-    strcpy(zmienna,buf);
+    sprintf(buf, "%0.1f", temperature);
+    strcpy(temperatureValue,buf);
 
     params.attr = attr;
-    params.data = &zmienna;
-    params.len = sizeof(zmienna);
+    params.data = &temperatureValue;
+    params.len = sizeof(temperatureValue);
     params.func = on_sent;
 
     err = bt_gatt_notify_cb(conn, &params);
@@ -140,14 +126,11 @@ int send_button_notification(struct bt_conn *conn, float value)
     return err;
 }
 
-
 void setTemperature(float temperature)
 {
-    temperatureValue = temperature;
-
     char buf[5];
-    sprintf(buf, "%0.1f", temperatureValue);
-    strcpy(zmienna,buf);
+    sprintf(buf, "%0.1f", temperature);
+    strcpy(temperatureValue,buf);
     LOG_WRN("%s", log_strdup(buf)); //Yields: "sprintf 1.234500"
 }
 
@@ -166,7 +149,8 @@ int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote
     int err;
     LOG_INF("Initializing bluetooth...");
 
-    if (bt_cb == NULL || remote_cb == NULL) {
+    if (bt_cb == NULL || remote_cb == NULL) 
+    {
         return -NRFX_ERROR_NULL;
     }
 
@@ -175,7 +159,8 @@ int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote
     remote_callbacks.data_received = remote_cb->data_received;
 
     err = bt_enable(bt_ready);
-    if (err) {
+    if (err) 
+    {
         LOG_ERR("bt_enable returned %d", err);
         return err;
     }
@@ -183,12 +168,11 @@ int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote
     k_sem_take(&bt_init_ok, K_FOREVER);
 
     err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
-    if (err) {
+    if (err) 
+    {
         LOG_ERR("Couldn't start advertising (err = %d)", err);
         return err;
     }
-
-
 
     return err;
 }
