@@ -7,8 +7,9 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 static K_SEM_DEFINE(bt_init_ok, 1, 1);
 
-static float humidityValue = 0.0;
+
 static char temperatureValue[5] = "temp";
+static char humidityValue[5] = "humi";
 
 
 enum bt_button_notifications_enabled notifications_enabled;
@@ -131,17 +132,15 @@ void setTemperature(float temperature)
     char buf[5];
     sprintf(buf, "%0.1f", temperature);
     strcpy(temperatureValue,buf);
-    LOG_WRN("%s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+    LOG_WRN("temperature: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
 }
 
 void setHumidity(float humidity)
 {
-    humidityValue = humidity;
-
-    char buf[25];
-    sprintf(buf, "sprintf %f", humidityValue);
-    
-    LOG_WRN("%s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+    char buf[5];
+    sprintf(buf, "%0.1f", humidity);
+    strcpy(humidityValue,buf);
+    LOG_WRN("Humidity: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
 }
 
 int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote_cb)

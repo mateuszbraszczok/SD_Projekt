@@ -30,7 +30,7 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #endif
 
 
-#define SETPOINT 24 
+
 #define HYSTERESIS 1
 
 
@@ -61,6 +61,9 @@ struct bt_remote_service_cb remote_callbacks =
 	.data_received = on_data_received,
 };
 
+#define SETPOINT 24 
+int setPoint = SETPOINT;
+
 /* Callbacks */
 
 void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t len)
@@ -68,6 +71,18 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
 	uint8_t temp_str[len+1];
 	memcpy(temp_str, data, len);
 	temp_str[len] = 0x00;
+
+
+	printk("firsByte: %d\n", (temp_str[0] -48 ));
+	printk("secondByte: %d\n", (temp_str[1] -48 ));
+
+	setPoint = ((temp_str[0] -48 ) * 10) +(temp_str[1] -48 ) ;
+
+	printk("dataLen: %d\n", len);
+
+	printk("setPoint: %d\n", setPoint);
+
+
 
 	LOG_INF("Received data on conn %p. Len: %d", (void *)conn, len);
 	LOG_INF("Data: %s", log_strdup(temp_str));
@@ -174,7 +189,7 @@ void main(void)
 	}
 	LOG_INF("Running");
 
-	int setPoint = SETPOINT;
+	//int setPoint = SETPOINT;
 	int hysteresis = HYSTERESIS;
 
 	while (1) 
@@ -199,7 +214,7 @@ void main(void)
 		//BLINKING LED
 		gpio_pin_set(dev, PIN, (int)led_is_on);
 		led_is_on = !led_is_on;
-		k_msleep(SLEEP_TIME_MS);
+		k_msleep(1000);
 	}
 }
 
