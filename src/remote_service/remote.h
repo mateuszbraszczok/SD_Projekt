@@ -20,14 +20,19 @@
 #define BT_UUID_REMOTE_HUMIDITY_VAL \
 	BT_UUID_128_ENCODE(0xe9ea0003, 0xe19b, 0x482d, 0x9293, 0xc7907585fc48)
 
+/** @brief UUID of the State Value. **/
+#define BT_UUID_REMOTE_STATE_VAL \
+	BT_UUID_128_ENCODE(0xe9ea0004, 0xe19b, 0x482d, 0x9293, 0xc7907585fc48)
+
 /** @brief UUID of the Message Characteristics. **/
 #define BT_UUID_REMOTE_MESSAGE_CHRC_VAL \
-	BT_UUID_128_ENCODE(0xe9ea0004, 0xe19b, 0x482d, 0x9293, 0xc7907585fc48)
+	BT_UUID_128_ENCODE(0xe9ea0005, 0xe19b, 0x482d, 0x9293, 0xc7907585fc48)
 	
 
 #define BT_UUID_REMOTE_SERVICE  	 BT_UUID_DECLARE_128(BT_UUID_REMOTE_SERV_VAL)
 #define BT_UUID_REMOTE_TEMPERATURE 	 BT_UUID_DECLARE_128(BT_UUID_REMOTE_TEMPERATURE_VAL)
 #define BT_UUID_REMOTE_HUMIDITY 	 BT_UUID_DECLARE_128(BT_UUID_REMOTE_HUMIDITY_VAL)
+#define BT_UUID_REMOTE_STATE 	 	 BT_UUID_DECLARE_128(BT_UUID_REMOTE_STATE_VAL)
 #define BT_UUID_REMOTE_MESSAGE_CHRC  BT_UUID_DECLARE_128(BT_UUID_REMOTE_MESSAGE_CHRC_VAL)
 
 enum bt_button_notifications_enabled 
@@ -48,6 +53,7 @@ int send_button_notification(struct bt_conn *conn, float value);
 
 void setTemperature(float temperature);
 void setHumidity(float temperature);
+void setState(bool state);
 
 
 int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote_cb);

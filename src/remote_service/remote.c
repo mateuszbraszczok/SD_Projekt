@@ -10,6 +10,7 @@ static K_SEM_DEFINE(bt_init_ok, 1, 1);
 
 static char temperatureValue[5] = "temp";
 static char humidityValue[5] = "humi";
+static char stateValue[5] = "stet";
 
 
 enum bt_button_notifications_enabled notifications_enabled;
@@ -29,6 +30,7 @@ static const struct bt_data sd[] =
 /* Declarations */
 static ssize_t read_temperature_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 static ssize_t read_humidity_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
+static ssize_t read_state_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr, void *buf, uint16_t len, uint16_t offset);
 void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value);
 static ssize_t on_write(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags);
 
@@ -42,6 +44,10 @@ BT_GATT_PRIMARY_SERVICE(BT_UUID_REMOTE_SERVICE),
                     BT_GATT_CHRC_READ,
                     BT_GATT_PERM_READ,
                     read_humidity_characteristic_cb, NULL, NULL),
+    BT_GATT_CHARACTERISTIC(BT_UUID_REMOTE_STATE,
+                    BT_GATT_CHRC_READ,
+                    BT_GATT_PERM_READ,
+                    read_state_characteristic_cb, NULL, NULL),
     BT_GATT_CCC(button_chrc_ccc_cfg_changed, BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
     BT_GATT_CHARACTERISTIC(BT_UUID_REMOTE_MESSAGE_CHRC,
                     BT_GATT_CHRC_WRITE_WITHOUT_RESP,
@@ -62,6 +68,12 @@ static ssize_t read_humidity_characteristic_cb(struct bt_conn *conn, const struc
 			                                void *buf, uint16_t len, uint16_t offset)
 {
 	return bt_gatt_attr_read(conn, attr, buf, len, offset, &humidityValue, sizeof(humidityValue));
+}
+
+static ssize_t read_state_characteristic_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			                                void *buf, uint16_t len, uint16_t offset)
+{
+	return bt_gatt_attr_read(conn, attr, buf, len, offset, &stateValue, sizeof(stateValue));
 }
 
 static ssize_t on_write(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
@@ -141,6 +153,22 @@ void setHumidity(float humidity)
     sprintf(buf, "%0.1f", humidity);
     strcpy(humidityValue,buf);
     LOG_WRN("Humidity: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+}
+
+void setState(bool state)
+{
+    char buf[5];
+    if (state)
+    {
+        strcpy(buf, "ON");
+    }
+    else
+    {
+        strcpy(buf, "OFF");
+    }
+    
+    strcpy(stateValue,buf);
+    LOG_WRN("State: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
 }
 
 int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote_cb)

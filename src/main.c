@@ -179,6 +179,7 @@ void main(void)
 	int i = 0;
 	nrf_gpio_cfg_output(RELAY_PIN);
 	nrf_gpio_pin_clear(RELAY_PIN);
+	setState(0);
 
 	
 	int err = bluetooth_init(&bluetooth_callbacks, &remote_callbacks);
@@ -200,11 +201,13 @@ void main(void)
 
 		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) < setPoint - hysteresis)
 		{
+			setState(1);
 			nrf_gpio_pin_set(RELAY_PIN);
 			printk("Relay is ON\n");
 		}
 		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) > setPoint + hysteresis)
 		{
+			setState(0);
 			nrf_gpio_pin_clear(RELAY_PIN);
 			printk("Relay is OFF\n");
 		}
