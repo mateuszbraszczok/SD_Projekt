@@ -3,5 +3,13 @@
   "nrf-connect.toolchain.path": "c:\\Users\\Mateusz\\ncs\\v1.9.1\\toolchain",
   "nrf-connect.applications": [
     "c:\\nordic\\myapps\\myfirstapp"
-  ]
+  ],
+  "files.associations": {
+    "log.h": "c",
+    "nrf_gpio.h": "c",
+    "spi_drive.h": "c",
+    "sstream": "c",
+    "bluetooth.h": "c",
+    "gpio_drv.h": "c"
+  }
 }

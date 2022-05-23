@@ -1,6 +1,6 @@
-#include "remote.h"
+#include "bluetooth_service.h"
 
-#define LOG_MODULE_NAME remote
+#define LOG_MODULE_NAME bluetooth_service
 LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 #define DEVICE_NAME CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN (sizeof(DEVICE_NAME)-1)
