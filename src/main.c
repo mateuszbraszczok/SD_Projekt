@@ -8,14 +8,13 @@
 #include <device.h>
 #include <devicetree.h>
 #include <drivers/gpio.h>
-#include "libraries/nrf_gpio.h"
 #include <logging/log.h>
 
 #include <nrfx.h>
 #include "driver/dht/dht.h"
 #include "bluetooth_service.h"
-#include "driver/spi/spi_drive.h"
-#include "driver/gpio/gpio_drv.h"
+#include "driver/spi/spi.h"
+#include "driver/gpio/gpio.h"
 
 #define LOG_MODULE_NAME main
 LOG_MODULE_REGISTER(LOG_MODULE_NAME);
@@ -42,6 +41,7 @@ K_MUTEX_DEFINE(dht_mutex);
 K_MUTEX_DEFINE(esp_mutex);
 
 #define RELAY_PIN   NRF_GPIO_PIN_MAP(1,10)
+#define ESP_PIN   NRF_GPIO_PIN_MAP(0,12)
 
 static struct bt_conn *current_conn;
 
@@ -68,7 +68,7 @@ struct bt_remote_service_cb remote_callbacks =
 int setPoint = SETPOINT;
 int heaterState = 0;
 
-bool bool_ESP_is_on = false;
+bool esp_is_on = false;
 /* Callbacks */
 
 void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t len)
@@ -77,12 +77,12 @@ void on_data_received(struct bt_conn *conn, const uint8_t *const data, uint16_t 
 	memcpy(temp_str, data, len);
 	temp_str[len] = 0x00;
 
-	printk("firsByte: %d\n", (temp_str[0] -48 ));
-	printk("secondByte: %d\n", (temp_str[1] -48 ));
+	//printk("firsByte: %d\n", (temp_str[0] -48 ));
+	//printk("secondByte: %d\n", (temp_str[1] -48 ));
 
 	setPoint = ((temp_str[0] -48 ) * 10) +(temp_str[1] -48 ) ;
 
-	printk("dataLen: %d\n", len);
+	//printk("dataLen: %d\n", len);
 
 	printk("setPoint: %d\n", setPoint);
 
@@ -126,6 +126,73 @@ void on_notif_changed(enum bt_button_notifications_enabled status)
 struct DHTReadings dht22;
 
 
+void main(void)
+{
+	gpio_init_input(ESP_PIN); // pin do czytania, czy ESP dało stan wysoki(jest włączone i gotowe do wymiany danych)
+	gpio_init_input(NRF_GPIO_PIN_MAP(0,31)); // przypisanie pinu od CS/SS żeby był PULLDOWN, by nie dawał przypadkiem stanu wysokiego
+
+	const struct device *dev;
+	bool led_is_on = true;
+
+	dev = device_get_binding(LED0);
+	if (dev == NULL) 
+	{
+		return;
+	}
+
+	int ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
+	if (ret < 0) 
+	{
+		return;
+	}
+
+	int i = 0;
+	gpio_init_output(RELAY_PIN); //Set relay as an output
+	gpio_write(RELAY_PIN,0 );  //Set relay to 0
+	setState(0);
+
+	int err = bluetooth_init(&bluetooth_callbacks, &remote_callbacks);
+
+	if (err)
+	{
+		LOG_ERR("Bluetooth_init returned %d", err);
+	}
+	LOG_INF("Running");
+
+	//int setPoint = SETPOINT;
+	int hysteresis = HYSTERESIS;
+
+	while (1) 
+	{
+		printk("iteration: %d\n", ++i);
+
+		//RELAY CONTROLLING
+		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) < setPoint - hysteresis)
+		{
+			heaterState = 1;
+			setState(1);
+			gpio_write(RELAY_PIN, 1);
+			printk("Relay is ON\n");
+		}
+		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) > setPoint + hysteresis)
+		{
+			heaterState = 0;
+			setState(0);
+			gpio_write(RELAY_PIN, 0);
+			printk("Relay is OFF\n");
+		}
+
+		printk("\n\n");
+
+		//BLINKING LED
+		gpio_pin_set(dev, PIN, (int)led_is_on);
+		led_is_on = !led_is_on;
+
+		k_msleep(1000);
+	}
+}
+
+
 void dhtReadingData(void)
 {
 	dht22.dhtModel = DHT22;
@@ -160,105 +227,35 @@ void dhtReadingData(void)
 	}
 }
 
-
-void main(void)
-{
-	gpio_init(12); // pin do czytania, czy ESP dało stan wysoki(jest włączone i gotowe do wymiany danych)
-	gpio_init(31); // przypisanie pinu od CS/SS żeby był PULLDOWN, by nie dawał przypadkiem stanu wysokiego
-
-	const struct device *dev;
-	bool led_is_on = true;
-
-	dev = device_get_binding(LED0);
-	if (dev == NULL) 
-	{
-		return;
-	}
-
-	int ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
-	if (ret < 0) 
-	{
-		return;
-	}
-
-	int i = 0;
-	nrf_gpio_cfg_output(RELAY_PIN); //Set relay as an output
-	nrf_gpio_pin_clear(RELAY_PIN);  //Set relay to 0
-	setState(0);
-
-	int err = bluetooth_init(&bluetooth_callbacks, &remote_callbacks);
-
-	if (err)
-	{
-		LOG_ERR("Bluetooth_init returned %d", err);
-	}
-	LOG_INF("Running");
-
-	//int setPoint = SETPOINT;
-	int hysteresis = HYSTERESIS;
-
-	while (1) 
-	{
-		printk("iteration: %d\n", ++i);
-
-		//RELAY CONTROLLING
-		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) < setPoint - hysteresis)
-		{
-			heaterState = 1;
-			setState(1);
-			nrf_gpio_pin_set(RELAY_PIN);
-			printk("Relay is ON\n");
-		}
-		if (dht22.temperatureIntPart + (dht22.temperatureDecimalPart/10) > setPoint + hysteresis)
-		{
-			heaterState = 0;
-			setState(0);
-			nrf_gpio_pin_clear(RELAY_PIN);
-			printk("Relay is OFF\n");
-		}
-
-		printk("\n\n");
-
-		//BLINKING LED
-		gpio_pin_set(dev, PIN, (int)led_is_on);
-		led_is_on = !led_is_on;
-
-		k_msleep(1000);
-	}
-}
-
-
 void checkIfEspIsConnected (void)
 {
 	while(1)
 	{
 		k_sleep(K_MSEC(100));
-		if(gpio_read(12) && !bool_ESP_is_on)
+		if(gpio_read(ESP_PIN) && !esp_is_on)
 		{
-			printk("first If\n");
 			if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)
 			{
-				bool_ESP_is_on = true;
+				esp_is_on = true;
 				spi_init();
 				k_mutex_unlock(&esp_mutex);
 			}
 			
 		}
-		else if (!gpio_read(12) && bool_ESP_is_on)
+		else if (!gpio_read(ESP_PIN) && esp_is_on)
 		{
-			printk("second If\n");
 			if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)
 			{
-				bool_ESP_is_on = false;
-				spi_uninit();
-				gpio_init(31);
+				esp_is_on = false;
+				spi_deinit();
+				gpio_init_input(NRF_GPIO_PIN_MAP(0,31));
 				k_mutex_unlock(&esp_mutex);
 			}
 		}
 
 		if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)
 		{
-			if(bool_ESP_is_on)
+			if(esp_is_on)
 			{
 				ESP_write_data(getTemperature(&dht22), getHumidity(&dht22), setPoint, heaterState);
 				printf("Sent to ESP\n");

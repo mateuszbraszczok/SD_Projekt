@@ -10,6 +10,7 @@
     "spi_drive.h": "c",
     "sstream": "c",
     "bluetooth.h": "c",
-    "gpio_drv.h": "c"
+    "gpio_drv.h": "c",
+    "dht.h": "c"
   }
 }

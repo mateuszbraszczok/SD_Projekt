@@ -19,10 +19,10 @@
 
     struct DHTReadings
     {
-        int temperatureIntPart;
-        int temperatureDecimalPart;
-        int humidityIntPart;
-        int humidityDecimalPart;
+        uint8_t temperatureIntPart;
+        uint8_t temperatureDecimalPart;
+        uint8_t humidityIntPart;
+        uint8_t humidityDecimalPart;
         DHTModel dhtModel;
     };
 

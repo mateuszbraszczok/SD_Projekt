@@ -9,8 +9,8 @@ target_sources(app PRIVATE
     src/main.c
     src/bluetooth_service/bluetooth_service.c
     src/driver/dht/dht.c
-    src/driver/spi/spi_drive.c
-    src/driver/gpio/gpio_drv.c
+    src/driver/spi/spi.c
+    src/driver/gpio/gpio.c
 )
 
 zephyr_library_include_directories(src/driver)
