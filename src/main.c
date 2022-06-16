@@ -231,24 +231,22 @@ void checkIfEspIsConnected (void)
 {
 	while(1)
 	{
-		k_sleep(K_MSEC(100));
-		if(gpio_read(ESP_PIN) && !esp_is_on)
+		if(gpio_read(ESP_PIN) && !esp_is_on)  // Moduł WI-Fi jest podłaczony
 		{
-			if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)
+			if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)  
 			{
-				esp_is_on = true;
 				spi_init();
+				esp_is_on = true;
 				k_mutex_unlock(&esp_mutex);
 			}
-			
 		}
-		else if (!gpio_read(ESP_PIN) && esp_is_on)
+		else if (!gpio_read(ESP_PIN) && esp_is_on) // Moduł WI-Fi nie jest podłaczony
 		{
 			if(k_mutex_lock(&esp_mutex, K_FOREVER) == 0)
 			{
-				esp_is_on = false;
 				spi_deinit();
 				gpio_init_input(NRF_GPIO_PIN_MAP(0,31));
+				esp_is_on = false;
 				k_mutex_unlock(&esp_mutex);
 			}
 		}
@@ -258,11 +256,11 @@ void checkIfEspIsConnected (void)
 			if(esp_is_on)
 			{
 				ESP_write_data(getTemperature(&dht22), getHumidity(&dht22), setPoint, heaterState);
-				printf("Sent to ESP\n");
+				printk("Sent data to ESP\n");
 			}
 			else
 			{
-				printf("Don't sent to ESP\n");
+				printk("Can't sent data to ESP\n");
 			}
 			k_mutex_unlock(&esp_mutex);
 			k_msleep(4000);

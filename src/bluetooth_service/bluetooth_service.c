@@ -106,7 +106,6 @@ void button_chrc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value
     }
 }
 
-
 void bt_ready(int err)
 {
     if (err)
@@ -115,8 +114,6 @@ void bt_ready(int err)
     }
     k_sem_give(&bt_init_ok);
 }
-
-
 
 int send_button_notification(struct bt_conn *conn, float temperature)
 {
@@ -144,7 +141,7 @@ void setTemperature(float temperature)
     char buf[5];
     sprintf(buf, "%0.1f", temperature);
     strcpy(temperatureValue,buf);
-    LOG_WRN("temperature: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+    LOG_WRN("temperature: %s", log_strdup(buf)); 
 }
 
 void setHumidity(float humidity)
@@ -152,7 +149,7 @@ void setHumidity(float humidity)
     char buf[5];
     sprintf(buf, "%0.1f", humidity);
     strcpy(humidityValue,buf);
-    LOG_WRN("Humidity: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+    LOG_WRN("Humidity: %s", log_strdup(buf)); 
 }
 
 void setState(bool state)
@@ -168,7 +165,7 @@ void setState(bool state)
     }
     
     strcpy(stateValue,buf);
-    LOG_WRN("State: %s", log_strdup(buf)); //Yields: "sprintf 1.234500"
+    LOG_WRN("State: %s", log_strdup(buf)); 
 }
 
 int bluetooth_init(struct bt_conn_cb *bt_cb, struct bt_remote_service_cb *remote_cb)

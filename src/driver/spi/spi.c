@@ -78,27 +78,3 @@ void ESP_write_data(float temperature, float humidity, int setPoint, int heaterS
 	}
 	while (!spi_xfer_done);
 }
-
-
-/* Funkcja czytająca z ESP, niestety dostaje smieci */
-void ESP_read(void)
-{
-	nrfx_err_t err_com;
-    spi_xfer_done = false;
-	memset(spi_tx_buf, 0, 32*sizeof(uint8_t));
-    memset(spi_rx_buf, 0, 32*sizeof(uint8_t));
-    spi_desc.tx_length = 32;
-    spi_desc.rx_length = 32;
-	spi_tx_buf[0] = 0x03;
-	spi_tx_buf[1] = 0x00;
-	err_com = nrfx_spi_xfer(&spi, &spi_desc,0);
-	if (err_com == NRFX_SUCCESS)
-	{
-        printk("I got: %s\n", spi_rx_buf);
-	}
-	else
-	{
-		printk("Config Mode No Success!\n");
-	}
-	while (!spi_xfer_done);
-}
